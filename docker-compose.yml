@@ -1,0 +1,67 @@
+version: '3.1'
+networks:
+  app-tier:
+    driver: bridge
+services:
+  mongo:
+    image: mongo
+    restart: always
+    env_file:
+      - .env
+    ports:
+      - 27018:27017
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${DB_USER_NAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${DB_PASSWORD}
+      MONGO_INITDB_DATABASE: chatbox
+    networks:
+      - app-tier
+    volumes:
+      - "./data/db:/data/db"
+      - "./mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro"
+
+  # mongo-express:
+  #   image: mongo-express
+  #   restart: always
+  #   ports:
+  #     - 18081:8081
+  #   env_file:
+  #     - .env
+  #   environment:
+  #     MONGO_INITDB_ROOT_USERNAME: ${DB_USER_NAME}
+  #     MONGO_INITDB_ROOT_PASSWORD: ${DB_PASSWORD}
+  #     MONGO_INITDB_DATABASE: chatbox
+  #   networks:
+  #     - app-tier
+
+  api:
+    container_name: chat_box_english
+    image: "node:10.18.0"
+    user: "root"
+    restart: always
+    ports:
+      - "8200:8000"
+    working_dir: /home/node/app
+    volumes:
+      - ./:/home/node/app
+    env_file:
+      - .env
+    depends_on:
+      - mongo
+    command: "npm run start:dev"
+    networks:
+      - app-tier
+
+  adminer:
+    image: dockette/adminer:full-php5
+    restart: always
+    ports:
+      - 18082:80
+    environment:
+      - ADMINER_DEFAULT_SERVER=mongo
+    networks:
+      - app-tier
+    depends_on:
+      - mongo
+
+

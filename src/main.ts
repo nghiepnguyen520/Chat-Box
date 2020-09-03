@@ -4,6 +4,7 @@ import { HttpExceptionFilter } from './exceptions/http-exception.filter';
 import { Logger } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { NestExpressApplication } from '@nestjs/platform-express';
+import { url } from 'inspector';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
@@ -27,6 +28,7 @@ function initialSwagger(app: NestExpressApplication): void {
     .setDescription('The document about list of API for Chat Box')
     .setVersion('v1.0')
     // .setContact('Chat Box')
+    // .addServer('localhost:3000', 'fine')
     .addBasicAuth()
     .addBearerAuth()
     .setBasePath('v1')

@@ -13,10 +13,12 @@ services:
     environment:
       MONGO_INITDB_ROOT_USERNAME: ${DB_USER_NAME}
       MONGO_INITDB_ROOT_PASSWORD: ${DB_PASSWORD}
+      MONGO_INITDB_DATABASE: ${DB_NAME}
     networks:
       - app-tier
     volumes:
       - "mongo-volume:/data/db"
+      - "./mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro"
 
   mongo-express:
     image: mongo-express

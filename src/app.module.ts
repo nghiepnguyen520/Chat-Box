@@ -25,7 +25,7 @@ import * as Joi from '@hapi/joi';
         PORT: Joi.number(),
       }),
     }),
-    MongooseModule.forRoot('mongodb://127.0.0.1:27017/chatbox'),
+    MongooseModule.forRoot('mongodb://admin:12345678@127.0.0.1:27017/chatbox'),
     MessageModule,
     AuthModule,
   ],

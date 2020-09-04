@@ -5,7 +5,9 @@ import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import { Reply } from 'src/schemas/reply.schema';
 import * as _ from 'lodash';
-
+import { ChatDto } from './dto/chat.dto';
+import { plainToClass } from 'class-transformer';
+import { ResponseDto } from './dto/response.dto';
 @Injectable()
 export class MessageService {
   constructor(
@@ -62,5 +64,17 @@ export class MessageService {
 
   async getAllMessageService(): Promise<Message[]> {
     return this.messageModel.find().exec();
+  }
+
+  async replyService(data: ChatDto) {
+    const { key } = data;
+    const isKey = await this.messageModel.findOne({ key });
+    if (!isKey) return plainToClass(ResponseDto, { data: '...' });
+    const lengthReply = isKey.replyMessage.length;
+    if (lengthReply < 0) return plainToClass(ResponseDto, { data: '...' });
+    const numberRandom = Math.floor(Math.random() * lengthReply);
+    return plainToClass(ResponseDto, {
+      data: isKey.replyMessage[numberRandom],
+    });
   }
 }

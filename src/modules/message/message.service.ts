@@ -4,6 +4,7 @@ import { Message } from 'src/schemas/message.schema';
 import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import { Reply } from 'src/schemas/reply.schema';
+import * as _ from 'lodash';
 
 @Injectable()
 export class MessageService {
@@ -13,16 +14,50 @@ export class MessageService {
     @InjectModel(Reply.name)
     private readonly replyModel: Model<Reply>,
   ) {}
-  async createKeyValueService(data: TrainDto) {
-    console.log(
-      'DEBUG_CODE: MessageService -> createKeyValueService -> data',
-      data,
-    );
+  async createKeyValueService(data: TrainDto): Promise<Message> {
     const { key, value } = data;
-    const createMessage = new this.messageModel({ key });
-    const createReply = new this.replyModel({ value });
-    createReply.save();
-    createMessage.save();
+    let isKey;
+    let isReply;
+
+    //Find Key
+    isKey = await this.messageModel.findOne({ key }).exec();
+
+    //Find Reply Value
+    isReply = await this.replyModel.findOne({ value }).exec();
+
+    //If !isReply create Reply DB
+    if (!isReply) {
+      isReply = await new this.replyModel({ value }).save();
+    }
+
+    //Create Data To Train
+    const dataTrain = {};
+    dataTrain['key'] = key;
+    dataTrain['replyMessage'] = [...isReply['value']];
+
+    if (!isKey) {
+      isKey = await new this.messageModel(dataTrain).save();
+    }
+
+    //Check Value Train Exit
+    const isIndexValueInKey = _.includes(
+      isKey['replyMessage'],
+      dataTrain['replyMessage'][0],
+    );
+
+    if (isIndexValueInKey) {
+      dataTrain['replyMessage'] = [...isKey['replyMessage']];
+      const convertKey = { ...dataTrain };
+      isKey = await this.messageModel.findByIdAndUpdate(isKey._id, convertKey);
+    } else {
+      dataTrain['replyMessage'] = [
+        ...isKey['replyMessage'],
+        ...isReply['value'],
+      ];
+      const convertKey = { ...dataTrain };
+      isKey = await this.messageModel.findByIdAndUpdate(isKey._id, convertKey);
+    }
+    return isKey;
   }
 
   async getAllMessageService(): Promise<Message[]> {

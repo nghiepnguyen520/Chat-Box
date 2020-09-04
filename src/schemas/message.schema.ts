@@ -5,6 +5,9 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 export class Message extends Document {
   @Prop({ required: true })
   key: string;
+
+  @Prop()
+  replyMessage: string[];
 }
 
 export const MessageSchema = SchemaFactory.createForClass(Message);

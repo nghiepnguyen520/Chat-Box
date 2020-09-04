@@ -8,13 +8,13 @@ import { Message } from 'src/schemas/message.schema';
 export class MessageController {
   constructor(private readonly messageService: MessageService) {}
 
-  @Post('/train')
-  async createKeyValue(@Body() dto: TrainDto) {
-    this.messageService.createKeyValueService(dto);
-  }
-
   @Get()
   async getAllMessage(): Promise<Message[]> {
     return this.messageService.getAllMessageService();
+  }
+
+  @Post('/train')
+  async createKeyValue(@Body() dto: TrainDto): Promise<Message> {
+    return this.messageService.createKeyValueService(dto);
   }
 }
